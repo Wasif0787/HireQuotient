@@ -2,6 +2,7 @@ import { useState } from "react";
 import { FaEdit } from "react-icons/fa";
 import { MdOutlineDeleteOutline } from "react-icons/md";
 
+
 function TableRow({ name, email, role }) {
     const [selected, setSelected] = useState(false);
     const [editable, setEditable] = useState(false);

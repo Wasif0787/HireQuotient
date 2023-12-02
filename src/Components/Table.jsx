@@ -6,7 +6,10 @@ import { searchQueryState } from "../../atoms/atom";
 
 function Table() {
     const searchedData = useRecoilValue(searchQueryState);
-    const [data, setData] = useState(null);
+    const [data, setData] = useState([]);
+    const [filteredData, setFilteredData] = useState([]);
+    const lowercasedSearchData = searchedData.toLowerCase();
+    console.log(lowercasedSearchData);
 
     useEffect(() => {
         const getData = async () => {
@@ -18,35 +21,37 @@ function Table() {
                     console.log(jsonData.error);
                 }
                 setData(jsonData);
+                // Call getFilteredData after setting the data
+                if(lowercasedSearchData.length>0){
+                    setFilteredData(
+                        data.filter(
+                            (item) =>
+                                item.name.toLowerCase().trim().includes(lowercasedSearchData) ||
+                                item.email.toLowerCase().trim().includes(lowercasedSearchData) ||
+                                item.role.toLowerCase().trim().includes(lowercasedSearchData) 
+                        )
+                    );
+                }else {
+                    setFilteredData([])
+                }
             } catch (error) {
                 console.log(error);
             }
         };
 
         getData();
-    }, []); // empty dependency array means it will run once after the initial render
+    }, [lowercasedSearchData]); // Call useEffect when search query changes
+    
 
-    // Lowercasing the search query and updating the state if needed
-    const lowercasedSearchData = searchedData.toLowerCase();
-
-    const filteredData = data
-        ? data.filter(
-            (item) =>
-                item.name.toLowerCase().includes(lowercasedSearchData) ||
-                item.email.toLowerCase().includes(lowercasedSearchData)
-        )
-        : [];
+    console.log(filteredData);
 
     return (
         <>
             <TableHeader name={"Name"} email={"Email"} role={"Role"} />
-            {searchedData === '' // Only show filtered data when there is a search query
-                ? data?.map((item, idx) => (
-                    <TableRow key={idx} name={item.name} email={item.email} role={item.role} />
-                ))
-                : filteredData.map((item, idx) => (
-                    <TableRow key={idx} name={item.name} email={item.email} role={item.role} />
-                ))}
+            {lowercasedSearchData === "" &&
+                data?.map((item, idx) => <TableRow key={idx} name={item.name} role={item.role} email={item.email} />)}
+            {lowercasedSearchData !== "" &&
+                filteredData?.map((item, idx) => <TableRow key={idx} name={item.name} role={item.role} email={item.email} />)}
         </>
     );
 }
